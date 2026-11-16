@@ -1,4 +1,4 @@
-//This in particular compile using  g++ Analyzer.cxx Base_script.cxx -o nameprog `root-config --libs --cflags` -lSpectrum
+//This in particular compile using  g++ -Isrc src/Analyzer.cxx example/Base_script.cxx -o nameprog `root-config --libs --cflags` -lSpectrum
 //Then use as ./nameprog path_to_rootfile
 
 #include <iostream>
@@ -68,6 +68,7 @@ void ScIndicesElem(int nSc, UInt_t npix, float* sc_redpixID, int &nSc_red, vecto
   nSc_red=0;
   B.clear();
   E.clear();
+  if(nSc==0) return; // no clusters in this event
 
   vector<float> sc_redpix_start;
   sc_redpix_start.push_back(0); // Initialize the start indices

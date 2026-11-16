@@ -1,0 +1,30 @@
+# Direction_recoils config: key=value, '#' starts a comment.
+
+input_file=reco_run00000_3D.root    # reconstruction output (Events tree)
+output_dir=.                        # writes <output_dir>/Direction_<input file name>
+NPIP=100                            # impact-point search stops at <= NPIP pixels (ER: 80, alphas: 2000)
+wfactor=1.5                         # length (px) of the weight around the impact point for the direction (ER: 2.5)
+threshold=0                         # set pixels with 0 < z <= threshold to 0 (0 = off)
+remove_noise_value=0                # set pixels whose 4 neighbours sum to <= value to 0 (0 = off)
+n_workers=4                         # direction_mp only
+
+# Optional cluster cuts
+#run_min=0
+#run_max=0
+#scint_min=0
+#scint_max=0
+#x_mean_min=0
+#x_mean_max=0
+#y_mean_min=0
+#y_mean_max=0
+
+# Optional elliptical cut on (x_mean, y_mean), instead of the x/y limits
+#position_shape=ellipse
+#ellipse_center_x=0
+#ellipse_center_y=0
+#ellipse_radius_major=0
+#ellipse_radius_minor=0
+#ellipse_rotation_deg=0             # major axis from +x
+
+# Save a picture of every Nth cluster (per worker) in ./Tracks/
+#save_png_every=1000
