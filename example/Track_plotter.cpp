@@ -28,6 +28,7 @@
 #include "TVirtualFitter.h"
 #include "TTree.h"
 #include "TBrowser.h"
+#include "TSystem.h"
 
 using namespace std;
 namespace fs = std::experimental::filesystem;
@@ -45,6 +46,7 @@ void ScIndicesElem(int nSc, UInt_t npix, float* sc_redpixID, int &nSc_red, vecto
 
 int main(int argc, char**argv) {
     TApplication *myapp=new TApplication("myapp",0,0); cout << "\n" << endl;
+    gSystem->mkdir("Tracks"); // Analyzer::SavePicDir writes into ./Tracks/
 
 
     bool batch_mode = 1;
@@ -218,6 +220,7 @@ void ScIndicesElem(int nSc, UInt_t npix, float* sc_redpixID, int &nSc_red, vecto
     nSc_red=0;
     B.clear();
     E.clear();
+    if(nSc==0) return; // no clusters in this event
 
     vector<float> sc_redpix_start;
     sc_redpix_start.push_back(0); // Initialize the start indices

@@ -1,4 +1,4 @@
-//g++ Analyzer.cxx INAF_dir_MP.cxx -O3 -o INAF_MP `root-config --libs --cflags` -lSpectrum
+//g++ -O3 -Isrc src/Analyzer.cxx example/INAF_dir_MP.cxx -o INAF_MP `root-config --libs --cflags` -lSpectrum
 #include <map>
 #include <fstream>
 #include <iostream>
@@ -34,6 +34,7 @@ void ScIndicesElem(int nSc, UInt_t npix, float* sc_redpixID, int &nSc_red,vector
     nSc_red = 0;
     B.clear();
     E.clear();
+    if (nSc == 0) return;                     // no clusters in this event
     vector<float> sc_redpix_start;
     sc_redpix_start.push_back(0);             // start index of first cluster
     // Determine start index of reduced pixels for each supercluster
@@ -122,13 +123,24 @@ int main(int argc, char** argv) {
     int threshold = std::stoi(config["threshold"]);
     int remove_noise_value = std::stoi(config["remove_noise_value"]);
     unsigned int nWorkers = config.count("n_workers") ? std::stoi(config["n_workers"]) : std::thread::hardware_concurrency();
-    
+    // Optional elliptical position cut on (x_mean, y_mean), used instead of x_mean/y_mean limits
+    const bool useEllipse = config.count("position_shape") && config["position_shape"] == "ellipse";
+    double ellX = 0, ellY = 0, ellA = 1, ellB = 1, ellRot = 0;
+    if (useEllipse) {
+        ellX = std::stod(config.at("ellipse_center_x"));
+        ellY = std::stod(config.at("ellipse_center_y"));
+        ellA = std::stod(config.at("ellipse_radius_major"));
+        ellB = std::stod(config.at("ellipse_radius_minor"));
+        ellRot = std::stod(config.at("ellipse_rotation_deg")) * M_PI / 180.0;   // major axis from +x
+    }
+
     std::filesystem::path inputPath(inputFilePath);
     std::string inputFileNameOnly = inputPath.filename().string();
     std::string finalOutputPath = outputDir + "/AnalysisMP_" + inputFileNameOnly;
 
     // Enable ROOT thread-safety (good practice for concurrent file access):contentReference[oaicite:3]{index=3}
     ROOT::EnableThreadSafety();
+    std::filesystem::create_directory("Tracks");   // Analyzer::SavePicDir writes into ./Tracks/
 
     // Open input file and retrieve TTree to determine total events
     std::cout << "Trying to open file: [" << inputFilePath << "]" << std::endl;
@@ -400,6 +412,7 @@ int main(int argc, char** argv) {
                     {"x_mean", x_mean},
                     {"y_mean", y_mean},
                     {"scint", scint},
+                    {"run", (double)run},
                     // ...add more event variables here as needed
                 };      
                 bool pass_all = true;
@@ -413,6 +426,12 @@ int main(int argc, char** argv) {
                         std::string var = key.substr(0, key.size() - 4);
                         if (event_vars.count(var) && event_vars[var] > std::stod(kv.second)) pass_all = false;
                     }
+                }
+                if (pass_all && useEllipse) {
+                    double dx = x_mean - ellX, dy = y_mean - ellY;
+                    double u = ( dx * std::cos(ellRot) + dy * std::sin(ellRot)) / ellA;
+                    double v = (-dx * std::sin(ellRot) + dy * std::cos(ellRot)) / ellB;
+                    if (u * u + v * v > 1) pass_all = false;
                 }
                 if (pass_all)
                 {//!

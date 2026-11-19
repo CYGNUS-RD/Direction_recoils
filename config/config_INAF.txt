@@ -1,0 +1,38 @@
+input_file=./Reco/INAF_Ar_2ndreco_0deg.root
+output_dir=.
+NPIP=50
+wfactor=5
+threshold=0
+remove_noise_value=0
+n_workers=8
+print_output=100000000
+
+# Valid run interval
+run_min=23934
+run_max=24291
+
+# Rectangle position cut. For an ellipse, remove x_mean/y_mean limits and use:
+# position_shape=ellipse
+# ellipse_center_x=1869.051
+# ellipse_center_y=956.883
+# ellipse_radius_major=292.456
+# ellipse_radius_minor=280.990
+# ellipse_rotation_deg=28.723
+position_shape=rectangle
+
+# Cuts for analysis 0deg 2nd reco
+x_mean_min=1750
+x_mean_max=2000
+y_mean_min=975
+y_mean_max=1125
+scint_min=24260
+scint_max=38150
+# cuts for analysis90deg 2nd reco
+#run_min=24294
+#run_max=24701
+#x_mean_min=1800
+#x_mean_max=2000
+#y_mean_min=925
+#y_mean_max=1125
+#scint_min=22330
+#scint_max=35150
